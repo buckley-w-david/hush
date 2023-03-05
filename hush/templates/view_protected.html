@@ -1,8 +1,7 @@
 {% extends "base.html" %}
-{% block title %}Index{% endblock %}
+{% block title %}View{% endblock %}
 {% block head %}
   {{ super() }}
-  <link rel="stylesheet" href="{{ url_for('static', path='/style.css') }}">
 {% endblock %}
 {% block content %}
   {% if error %}
@@ -11,7 +10,7 @@
   <form method="post">
     <div>
       <label for="passphrase">Passphrase: </label>
-      <input type="text" id="passphrase" name="passphrase" />
+      <input type="text" id="passphrase" name="passphrase" autocomplete="off" />
     </div>
   </form>
 {% endblock %}

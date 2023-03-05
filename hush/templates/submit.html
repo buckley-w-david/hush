@@ -1,9 +1,10 @@
 {% extends "base.html" %}
-{% block title %}Index{% endblock %}
+{% block title %}Submit{% endblock %}
 {% block head %}
   {{ super() }}
-  <link rel="stylesheet" href="{{ url_for('static', path='/style.css') }}">
 {% endblock %}
 {% block content %}
-  <p>Your secret can be accessed <a href="{{ url_for('view', id=id) }}">here</a></p>
+  <h2>Sharable Link:</h2>
+  <p class="secret-link">{{ url_for('view', id=id) }}</p>
+  <p>Remember, the link can only be viewed once before it is deleted.</p>
 {% endblock %}
