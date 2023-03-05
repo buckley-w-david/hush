@@ -29,7 +29,7 @@ async def index(request: Request):
 
 
 class SecretType(enum.IntEnum):
-    PLAINTEXT = 0
+    NORMAL = 0
     PASSWORD_PROTECTED = 1
 
 
@@ -45,13 +45,15 @@ async def submit(
     passphrase: Optional[str] = Form(None),
     ttl: int = Form(),
 ):
-    type = SecretType.PASSWORD_PROTECTED if passphrase else SecretType.PLAINTEXT
+    type = SecretType.PASSWORD_PROTECTED if passphrase else SecretType.NORMAL
+    key, salt = ENCRYPTION_KEY, b""
     if passphrase:
-        # FIXME: I don't know how good of an idea it is to only encrypt with passphrase
-        #        It definetly needs to be part of it, but maybe only part?
-        encrypted_secret, salt = crypto.encrypt_passphrase(secret, passphrase)
-    else:
-        encrypted_secret, salt = crypto.encrypt(secret, ENCRYPTION_KEY), b""
+        # DANGER: This is _exactly_ what people mean when they say don't roll your own crypto
+        #         I just made up this operation without any real knowledge of the security implications
+        #         This XORs the passphrase generated key with the static encryption key
+        #         I could just directly use the passphrase generated key, but I was worried people would use shitty passphrases.
+        key, salt = crypto.merged_key(key, passphrase)
+    encrypted_secret = crypto.encrypt(secret, key)
 
     id = str(uuid.uuid4())
     redis_key = f"hush:{id}"
@@ -75,7 +77,7 @@ async def view(request: Request, id: str):
     secret = await redis.hgetall(redis_key)
 
     type = SecretType(int(secret[b"type"]))
-    if type is SecretType.PLAINTEXT:
+    if type is SecretType.NORMAL:
         decrypted_secret = crypto.decrypt(secret[b"secret"], ENCRYPTION_KEY)
         await redis.delete(redis_key)
         return templates.TemplateResponse(
@@ -86,14 +88,13 @@ async def view(request: Request, id: str):
 
 
 @app.post("/view/{id}", response_class=HTMLResponse)
-async def view_protected(request: Request, id: str, passphrase=Form()):
+async def view_protected(request: Request, id: str, passphrase: str = Form()):
     redis_key = f"hush:{id}"
     secret = await redis.hgetall(redis_key)
 
     try:
-        decrypted_secret = crypto.decrypt_passphrase(
-            secret[b"secret"], secret[b"salt"], passphrase
-        )
+        key, _ = crypto.merged_key(ENCRYPTION_KEY, passphrase, secret[b"salt"])
+        decrypted_secret = crypto.decrypt( secret[b"secret"], key)
         await redis.delete(redis_key)
         return templates.TemplateResponse(
             "view.html", {"request": request, "secret": decrypted_secret}
