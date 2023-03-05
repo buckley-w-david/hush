@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% block head %}
+    <link rel="stylesheet" href="{{ url_for('static', path='/style.css') }}">
+    <title>{% block title %}{% endblock %} - Hush</title>
+    {% endblock %}
+</head>
+<body>
+    <div id="content">
+      <h1><a href="/">Hush</a></h1>
+      {% block content %}{% endblock %}
+    </div>
+    <!-- <div id="footer"> -->
+    <!--     {% block footer %} -->
+    <!--     &copy; Copyright 2008 by <a href="http://domain.invalid/">you</a>. -->
+    <!--     {% endblock %} -->
+    <!-- </div> -->
+</body>
+</html>

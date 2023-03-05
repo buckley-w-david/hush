@@ -1,0 +1,22 @@
+[tool.poetry]
+name = "hush"
+version = "0.1.0"
+description = ""
+authors = ["David Buckley <david@davidbuckley.ca>"]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+fastapi = "^0.92.0"
+uvicorn = {extras = ["standard"], version = "^0.20.0"}
+cryptography = "^39.0.2"
+Jinja2 = "^3.1.2"
+python-multipart = "^0.0.6"
+redis = {extras = ["hiredis"], version = "^4.5.1"}
+
+[tool.poetry.dev-dependencies]
+pytest = "^7.2.2"
+black = "^23.1.0"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

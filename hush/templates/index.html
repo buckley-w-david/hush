@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Index{% endblock %}
+{% block head %}
+  {{ super() }}
+  <link rel="stylesheet" href="{{ url_for('static', path='/style.css') }}">
+{% endblock %}
+{% block content %}
+  <form action="/submit" method="post" id="secret-form">
+    <textarea name="secret" autocomplete="off" placeholder="Secret content goes here..."></textarea>
+    <fieldset id="privacy">
+      <legend>Privacy Options</legend>
+      <div>
+        <label for="passphrase">Passphrase: </label>
+        <input type="text" id="passphrase" name="passphrase" autocomplete="off" />
+      </div>
+      <div>
+       <label for="ttl">Lifetime: </label>
+       <select name="ttl" id="ttl">
+         <option value="604800">7 days</option>
+         <option value="259200">3 days</option>
+         <option value="86400">1 day</option>
+         <option value="43200">12 hours</option>
+         <option value="14400">4 hours</option>
+         <option value="3600">1 hour</option>
+         <option value="1800">30 minutes</option>
+         <option value="300">5 minutes</option>
+       </select> 
+      </div>
+      <button id="submit">Submit</button>
+    </fieldset>
+  </form>
+{% endblock %}
