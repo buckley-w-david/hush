@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block title %}View{% endblock %}
+{% block head %}
+  {{ super() }}
+{% endblock %}
+{% block content %}
+  <p>Your secret: </p>
+  <textarea readonly="readonly">{{ secret }}</textarea>
+{% endblock %}

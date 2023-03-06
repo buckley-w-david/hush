@@ -74,32 +74,32 @@ async def submit(
 @app.get("/view/{id}", response_class=HTMLResponse)
 async def view(request: Request, id: str):
     redis_key = f"hush:{id}"
-    secret = await redis.hgetall(redis_key)
+    type_ = await redis.hget(redis_key, "type")
+    if not type_:
+        return templates.TemplateResponse("404.html", {"request": request}, status_code=404)
 
-    type = SecretType(int(secret[b"type"]))
-    if type is SecretType.NORMAL:
-        decrypted_secret = crypto.decrypt(secret[b"secret"], ENCRYPTION_KEY)
-        await redis.delete(redis_key)
-        return templates.TemplateResponse(
-            "view.html", {"request": request, "secret": decrypted_secret}
-        )
-    else:
-        return templates.TemplateResponse("view_protected.html", {"request": request})
+    type = SecretType(int(type_))
+    return templates.TemplateResponse("view.html", {"request": request, "password_protected": type is SecretType.PASSWORD_PROTECTED})
 
 
 @app.post("/view/{id}", response_class=HTMLResponse)
-async def view_protected(request: Request, id: str, passphrase: str = Form()):
+async def view_protected(request: Request, id: str, passphrase: str = Form(None)):
     redis_key = f"hush:{id}"
     secret = await redis.hgetall(redis_key)
+    type = SecretType(int(secret[b"type"]))
 
     try:
-        key, _ = crypto.merged_key(ENCRYPTION_KEY, passphrase, secret[b"salt"])
+        if type is SecretType.PASSWORD_PROTECTED:
+            key, _ = crypto.merged_key(ENCRYPTION_KEY, passphrase, secret[b"salt"])
+        else:
+            key = ENCRYPTION_KEY
+
         decrypted_secret = crypto.decrypt( secret[b"secret"], key)
         await redis.delete(redis_key)
         return templates.TemplateResponse(
-            "view.html", {"request": request, "secret": decrypted_secret}
+            "reveal.html", {"request": request, "secret": decrypted_secret}
         )
     except (cryptography.exceptions.InvalidKey, cryptography.fernet.InvalidToken):
         return templates.TemplateResponse(
-            "view_protected.html", {"request": request, "error": "Invalid passphrase"}
+            "view.html", {"request": request, "error": "Invalid passphrase"}
         )

@@ -4,6 +4,18 @@
   {{ super() }}
 {% endblock %}
 {% block content %}
-  <p>Your secret: </p>
-  <textarea readonly="readonly">{{ secret }}</textarea>
+  {% if error %}
+  <p class="warning">{{ error }}</p>
+  {% endif %}
+  <form method="post">
+    {% if password_protected %}
+    <div>
+      <label for="passphrase">Passphrase: </label>
+      <input type="text" id="passphrase" name="passphrase" autocomplete="off" />
+    </div>
+    <button id="submit">Submit</button>
+    {% else %}
+    <button id="submit">View Secret</button>
+    {% endif %}
+  </form>
 {% endblock %}
