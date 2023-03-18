@@ -2,9 +2,25 @@
 {% block title %}Submit{% endblock %}
 {% block head %}
   {{ super() }}
+  <style type="text/css">
+    .secret-link {
+	  border: white solid 1px;
+	  padding: 5px;
+	  border-radius: 10px;
+    }
+  </style>
 {% endblock %}
 {% block content %}
   <h2>Sharable Link:</h2>
   <p class="secret-link">{{ url_for('view', id=id) }}</p>
   <p>Remember, the link can only be viewed once before it is deleted.</p>
+  <script>
+    const selection = window.getSelection();
+    const range = document.createRange();
+    const link = document.querySelector(".secret-link")
+
+    range.selectNodeContents(link);
+    selection.removeAllRanges();
+    selection.addRange(range);
+  </script>
 {% endblock %}
